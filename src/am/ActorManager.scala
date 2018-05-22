@@ -48,6 +48,6 @@ class ActorManager {
     }
   }
 
-  private def referenceAddress(addr: ActorAddress): ActorRef =
-    (sender, message) => server.send(new MessagePacket(from = null, to = addr, contents = message))
+  private def referenceAddress(addr: ActorAddress): ActorRef = (sender, message) =>
+    server.send(new MessagePacket(from = null, to = addr, contents = message))
 }
