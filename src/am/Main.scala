@@ -17,7 +17,7 @@ object Main {
 
       override def receive(sender: ActorRef, message: Message) = message match {
         case SendMessage(s) => {
-          actor1ref.send(reference, new StringMessage(s))
+          actor1ref.send(new StringMessage(s))
           println("Passed message")
         }
         case _ => println("Unrecognized message 2")

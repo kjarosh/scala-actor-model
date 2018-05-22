@@ -16,7 +16,7 @@ abstract class Actor {
   thread.start()
 
   private var _reference = defaultReference
-  def reference = _reference
+  implicit def reference = _reference
   private def reference_=(ref: ActorRef) = _reference = ref
 
   def receive(sender: ActorRef, message: Message)
