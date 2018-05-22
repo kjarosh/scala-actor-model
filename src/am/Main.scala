@@ -11,18 +11,19 @@ object Main {
         case _ => println("Unrecognized message 1")
       }
     }
-    actor1.start()
-    
+
     val actor2 = new Actor {
       val actor1ref = actor1.reference
-      
+
       override def receive(sender: ActorRef, message: Message) = message match {
-        case SendMessage(s) => actor1ref.send(new StringMessage(s))
-        case _ => println("Unrecognized message 1")
+        case SendMessage(s) => {
+          actor1ref.send(reference, new StringMessage(s))
+          println("Passed message")
+        }
+        case _ => println("Unrecognized message 2")
       }
     }
-    actor2.start()
-    
-    actor2.reference.send(new SendMessage("test"))
+
+    actor2.reference.send(Actor.ignore, new SendMessage("test"))
   }
 }

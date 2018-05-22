@@ -5,29 +5,49 @@ import java.net.SocketAddress
 import am.network.RUDPServer
 import am.network.ActorAddress
 import am.network.MessagePacket
+import scala.collection.mutable.Queue
+import java.util.concurrent.Semaphore
 
-abstract class Actor extends Thread {
+abstract class Actor {
+  private val queue = new Queue[(ActorRef, Message)]()
+  private val ready = new Semaphore(0)
+
+  private val thread = new Thread(() => run())
+  thread.start()
+
+  private var _reference = defaultReference
+  def reference = _reference
+  private def reference_=(ref: ActorRef) = _reference = ref
+
   def receive(sender: ActorRef, message: Message)
 
-  private val rudp = new RUDPServer()
-  val address = new ActorAddress(rudp.socketAddress, 0)
+  final def dispatch(sender: ActorRef, message: Message) = {
+    queue.enqueue((sender, message))
 
-  override def run() = {
+    // notify this actor that a new message is in
+    //   the queue
+    ready.release()
+  }
+
+  private def run() = {
     while (!Thread.interrupted()) {
-      val packet = rudp.receive()
+      // wait for a message
+      ready.acquire()
 
-      val sender = this.referenceAddress(packet.from)
+      val (sender, message) = queue.dequeue()
 
-      packet.contents match {
+      message match {
         case m: Message => receive(sender, m)
         case _ => println("Invalid message")
       }
     }
   }
 
-  private def referenceAddress(address: ActorAddress): ActorRef =
-    message => rudp.send(new MessagePacket(from = null, to = address, contents = message))
+  private def defaultReference: ActorRef =
+    (sender, message) => this.dispatch(sender, message)
+}
 
-  def reference = referenceAddress(this.address)
-
+object Actor {
+  def ignore(): ActorRef =
+    (sender, message) => ()
 }

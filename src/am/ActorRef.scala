@@ -2,5 +2,5 @@ package am
 
 @FunctionalInterface
 trait ActorRef {
-  def send(message: Message)
+  def send(sender: ActorRef, message: Message)
 }

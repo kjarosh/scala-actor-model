@@ -31,9 +31,8 @@ class RUDPServer {
     val packet = new DatagramPacket(buf, buf.length);
 
     socket.receive(packet);
-
-    val bis = new ByteArrayInputStream(buf)
-    val ois = new ObjectInputStream(bis)
+    
+    val ois = new ObjectInputStream(new ByteArrayInputStream(buf))
     val ret = ois.readObject()
     ois.close()
 
