@@ -1,6 +1,7 @@
 package am
 
 import am.message.Message
+import am.message.KillMessage
 
 case class StringMessage(s: String) extends Message
 case class SendMessage(s: String) extends Message
@@ -31,5 +32,10 @@ object Main {
     //actorManager2.register(actor2)
 
     actor2.reference.send(Actor.ignore, new SendMessage("test"))
+    
+    Thread.sleep(1000)
+    
+    actor1.reference.send(Actor.ignore, new KillMessage())
+    actor2.reference.send(Actor.ignore, new KillMessage())
   }
 }
