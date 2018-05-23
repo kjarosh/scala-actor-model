@@ -9,6 +9,7 @@ import java.io.ObjectInputStream
 import java.io.Serializable
 import java.net.SocketAddress
 import scala.annotation.tailrec
+import am.Logger
 
 /**
  * An implementation of the Reliable UDP communication,
@@ -23,6 +24,7 @@ import scala.annotation.tailrec
  * </table>
  */
 class RUDPServer {
+  private def logger = RUDPServer.logger
   private val socket = new DatagramSocket();
 
   /**
@@ -39,6 +41,8 @@ class RUDPServer {
    * Send the packet.
    */
   final def send(packet: MessagePacket) = {
+    logger.debug(s"Sending a packet from ${packet.from} to ${packet.to}")
+
     val bos = new ByteArrayOutputStream()
     val oos = new ObjectOutputStream(bos)
     oos.writeObject(packet.from)
@@ -64,11 +68,19 @@ class RUDPServer {
     val message = ois.readObject()
     ois.close()
 
+    logger.debug(s"Received a packet from $sender to $receiver")
+
     return (sender, receiver) match {
       case (from: ActorAddress, to: ActorAddress) =>
         new MessagePacket(from = from, to = to, contents = message)
-      case _ => receive()
+      case _ => {
+        logger.err("Invalid from/to")
+        receive()
+      }
     }
   }
 }
 
+object RUDPServer {
+  private val logger = new Logger("RUDPServer")
+}
