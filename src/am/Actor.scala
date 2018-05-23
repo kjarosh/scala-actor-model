@@ -15,31 +15,34 @@ abstract class Actor {
   private val thread = new Thread(() => run())
   thread.start()
 
+  private var _defaultSender = Actor.ignore
+  protected implicit def defaultSender = _defaultSender
+
   private var _reference = defaultReference
-  implicit def reference = _reference
-  private def reference_=(ref: ActorRef) = _reference = ref
+  def reference = _reference
+  def reference_=(ref: ActorRef) = {
+    _reference = ref
+    _defaultSender = ref
+  }
 
   def receive(sender: ActorRef, message: Message)
 
   final def dispatch(sender: ActorRef, message: Message) = {
     queue.enqueue((sender, message))
 
-    // notify this actor that a new message is in
-    //   the queue
+    // notify this actor that a new message is in the queue
     ready.release()
   }
 
-  private def run() = {
-    while (!Thread.interrupted()) {
-      // wait for a message
-      ready.acquire()
+  private def run() = while (!Thread.interrupted()) {
+    // wait for a message
+    ready.acquire()
 
-      val (sender, message) = queue.dequeue()
+    val (sender, message) = queue.dequeue()
 
-      message match {
-        case m: Message => receive(sender, m)
-        case _ => println("Invalid message")
-      }
+    message match {
+      case m: Message => receive(sender, m)
+      case _ => println("Invalid message")
     }
   }
 
@@ -48,6 +51,5 @@ abstract class Actor {
 }
 
 object Actor {
-  def ignore(): ActorRef =
-    (sender, message) => ()
+  def ignore(): ActorRef = (sender, message) => ()
 }

@@ -4,6 +4,7 @@ import am.network.RUDPServer
 import scala.collection.mutable.HashMap
 import am.network.ActorAddress
 import am.network.MessagePacket
+import am.network.NetworkActorRef
 
 /**
  * This class is responsible for managing multiple actors.
@@ -18,6 +19,7 @@ class ActorManager {
    */
   private val server = new RUDPServer()
   private val registered = new HashMap[Int, Actor]()
+  private var nextId = 0
 
   private val thread = new Thread(
     () => while (!Thread.interrupted()) handlePacket())
@@ -28,7 +30,11 @@ class ActorManager {
    * network address.
    */
   def register(actor: Actor) = {
+    val id = nextId
+    nextId += 1
 
+    registered.put(id, actor)
+    actor.reference = referenceAddress(new ActorAddress(server.socketAddress, id))
   }
 
   private def handlePacket(): Unit = {
@@ -48,6 +54,9 @@ class ActorManager {
     }
   }
 
-  private def referenceAddress(addr: ActorAddress): ActorRef = (sender, message) =>
-    server.send(new MessagePacket(from = null, to = addr, contents = message))
+  /*private def referenceAddress(addr: ActorAddress): ActorRef = (sender, message) =>
+    server.send(new MessagePacket(from = null, to = addr, contents = message))*/
+
+  private def referenceAddress(addr: ActorAddress): ActorRef =
+    new NetworkActorRef(server, addr)
 }
