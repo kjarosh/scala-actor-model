@@ -1,7 +1,7 @@
 package am.network
 
 import am.ActorRef
-import am.Message
+import am.message.Message
 import java.net.SocketAddress
 import java.net.InetSocketAddress
 

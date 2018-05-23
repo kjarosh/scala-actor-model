@@ -5,6 +5,7 @@ import scala.collection.mutable.HashMap
 import am.network.ActorAddress
 import am.network.MessagePacket
 import am.network.NetworkActorRef
+import am.message.Message
 
 /**
  * This class is responsible for managing multiple actors.

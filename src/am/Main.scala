@@ -1,5 +1,7 @@
 package am
 
+import am.message.Message
+
 case class StringMessage(s: String) extends Message
 case class SendMessage(s: String) extends Message
 
@@ -11,8 +13,8 @@ object Main {
         case _ => println("Unrecognized message 1")
       }
     }
-    val actorManager1 = new ActorManager()
-    actorManager1.register(actor1)
+    //val actorManager1 = new ActorManager()
+    //actorManager1.register(actor1)
 
     val actor2 = new Actor {
       val actor1ref = actor1.reference
@@ -25,8 +27,8 @@ object Main {
         case _ => println("Unrecognized message 2")
       }
     }
-    val actorManager2 = new ActorManager()
-    actorManager2.register(actor2)
+    //val actorManager2 = new ActorManager()
+    //actorManager2.register(actor2)
 
     actor2.reference.send(Actor.ignore, new SendMessage("test"))
   }

@@ -1,5 +1,7 @@
 package am
 
+import am.message.Message
+
 @FunctionalInterface
 trait ActorRef {
   def send(sender: ActorRef, message: Message): Unit
