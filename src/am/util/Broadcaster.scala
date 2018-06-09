@@ -1,16 +1,17 @@
 package am.util
 
-import am.Actor
-import am.ActorRef
+import java.util
+
+import am.{AbstractActor, ActorRef}
 import am.message.Message
-import java.util.ArrayList
 
-class Broadcaster extends Actor {
-  private val targets = new ArrayList[ActorRef]()
+class Broadcaster extends AbstractActor {
+  private val targets = new util.ArrayList[ActorRef]()
 
-  def add(actor: ActorRef) = targets.add(actor)
-  def remove(actor: ActorRef) = targets.remove(actor)
-  
+  def add(actor: ActorRef): Boolean = targets.add(actor)
+
+  def remove(actor: ActorRef): Boolean = targets.remove(actor)
+
   def receive(sender: ActorRef, message: Message): Unit =
     targets.forEach(a => a.send(sender, message))
 }

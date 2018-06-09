@@ -1,86 +1,73 @@
 package am.network
 
-import java.net.DatagramSocket
-import java.net.DatagramPacket
-import java.io.ObjectOutputStream
-import java.io.ByteArrayOutputStream
-import java.io.ByteArrayInputStream
-import java.io.ObjectInputStream
-import java.io.Serializable
-import java.net.SocketAddress
-import scala.annotation.tailrec
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
+import java.net.{DatagramPacket, DatagramSocket, SocketAddress}
+
 import am.Logger
+
+import scala.annotation.tailrec
 
 /**
  * An implementation of the Reliable UDP communication,
  * i.e. such that no packet loss is guaranteed.
- *
- * <table>
- *     <tr><th>Field</th> <th>Type</th></tr>
- *     <tr><td>Sender address</td> <td>ActorAddress</td></tr>
- *     <tr><td>Receiver address</td> <td>ActorAddress</td></tr>
- *     <tr><td>Message</td> <td>Serializable</td></tr>
- *     <caption>Packet structure</caption>
- * </table>
  */
-class RUDPServer {
+class RUDPServer extends AutoCloseable {
   private def logger = RUDPServer.logger
-  private val socket = new DatagramSocket();
+
+  private val socket = new DatagramSocket()
 
   /**
    * Local port.
    */
-  def port = socket.getLocalPort
+  def port: Int = socket.getLocalPort
 
   /**
    * Local socket address.
    */
-  def socketAddress = socket.getLocalSocketAddress
+  def socketAddress: SocketAddress = socket.getLocalSocketAddress
 
   /**
    * Send the packet.
    */
-  final def send(packet: MessagePacket) = {
+  final def send(packet: MessagePacket): Unit = {
     logger.debug(s"Sending a packet from ${packet.from} to ${packet.to}")
 
     val bos = new ByteArrayOutputStream()
-    val oos = new ObjectOutputStream(bos)
-    oos.writeObject(packet.from)
-    oos.writeObject(packet.to)
-    oos.writeObject(packet.contents)
-    oos.close()
+    new ObjectOutputStream(bos).writeObject(packet)
 
-    val buf = bos.toByteArray()
-    val dt = new DatagramPacket(buf, buf.length, packet.to.address);
-    socket.send(dt);
+    val buf = bos.toByteArray
+
+    if (buf.length > RUDPServer.MAX_PACKET_SIZE) {
+      throw MessageTooLongException(buf.length)
+    }
+
+    socket.send(new DatagramPacket(buf, buf.length, packet.to.address))
   }
+
+  private val buffer = new Array[Byte](RUDPServer.MAX_PACKET_SIZE)
 
   @tailrec
   final def receive(): MessagePacket = {
-    val buf = new Array[Byte](1024)
-    val packet = new DatagramPacket(buf, buf.length);
+    val dt = new DatagramPacket(buffer, buffer.length)
 
-    socket.receive(packet);
+    socket.receive(dt)
 
-    val ois = new ObjectInputStream(new ByteArrayInputStream(buf))
-    val sender = ois.readObject()
-    val receiver = ois.readObject()
-    val message = ois.readObject()
-    ois.close()
+    val ois = new ObjectInputStream(new ByteArrayInputStream(dt.getData))
+    val obj = ois.readObject()
 
-    logger.debug(s"Received a packet from $sender to $receiver")
-
-    return (sender, receiver) match {
-      case (from: ActorAddress, to: ActorAddress) =>
-        new MessagePacket(from = from, to = to, contents = message)
-      case _ => {
-        logger.err("Invalid from/to")
-        receive()
-      }
+    obj match {
+      case packet: MessagePacket =>
+        packet
+      case _ => receive()
     }
   }
+
+  def close(): Unit = socket.close()
 }
 
 object RUDPServer {
   private val logger = new Logger("RUDPServer")
+
+  // 16 KiB
+  private val MAX_PACKET_SIZE = 16 * 1024
 }

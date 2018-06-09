@@ -1,24 +1,21 @@
 package am.util
 
-import am.Actor
-import java.util.ArrayList
-import am.ActorRef
-import am.message.Message
-import am.message.TrackIdleMessage
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.Queue
+import am.message.{Message, TrackIdleMessage}
+import am.{AbstractActor, ActorRef}
 
-private case class TargetFreeMessage(val id: Int) extends Message
+import scala.collection.mutable
 
-class Dispatcher extends Actor {
+private case class TargetFreeMessage(id: Int) extends Message
+
+class Dispatcher extends AbstractActor {
   private var nextId = 1
-  private val targetsFree = new HashMap[Int, Boolean]()
-  private val targetsById = new HashMap[Int, ActorRef]()
-  private val targets = new HashMap[ActorRef, Int]()
+  private val targetsFree = new mutable.HashMap[Int, Boolean]()
+  private val targetsById = new mutable.HashMap[Int, ActorRef]()
+  private val targets = new mutable.HashMap[ActorRef, Int]()
 
   private val lock = new Object()
 
-  def add(actor: ActorRef) = lock.synchronized {
+  def add(actor: ActorRef): Option[Boolean] = lock.synchronized {
     if (nextId == 0) nextId += 1
 
     val id = nextId
@@ -46,9 +43,9 @@ class Dispatcher extends Actor {
     return 0
   }
 
-  private val toHandle = new Queue[(ActorRef, Message)]()
+  private val toHandle = new mutable.Queue[(ActorRef, Message)]()
 
-  private def handleEnqueued() = lock.synchronized {
+  private def handleEnqueued(): Unit = lock.synchronized {
     var id = firstFree()
     while (id != 0) {
       val (sender, message) = toHandle.dequeue()
@@ -58,21 +55,20 @@ class Dispatcher extends Actor {
     }
   }
 
-  private def handle(id: Int, sender: ActorRef, message: Message) = {
-    val finalMessage = new TrackIdleMessage(message, new TargetFreeMessage(id))
+  private def handle(id: Int, sender: ActorRef, message: Message): Unit = {
+    val finalMessage = TrackIdleMessage(message, TargetFreeMessage(id))
     targetsById(id).send(sender, finalMessage)
     targetsFree(id) = false
   }
 
   def receive(sender: ActorRef, message: Message): Unit = lock.synchronized {
     message match {
-      case TargetFreeMessage(id) => {
+      case TargetFreeMessage(id) =>
         targetsFree(id) = true
 
         handleEnqueued()
-      }
 
-      case _ => {
+      case _ =>
         val id = firstFree()
         if (id != 0) {
           handle(id, sender, message)
@@ -81,7 +77,6 @@ class Dispatcher extends Actor {
 
         // no free actor
         toHandle.enqueue((sender, message))
-      }
     }
   }
 }

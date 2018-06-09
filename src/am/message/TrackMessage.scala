@@ -2,8 +2,8 @@ package am.message
 
 /**
  * When an actor receives this message, it will respond back
- * with {@code confirmation}.
+ * with [[confirmation]] and [[message]] will be handled normally.
  */
 case class TrackMessage(
-  val message: Message,
-  val confirmation: Message) extends Message
+  message: Message,
+  confirmation: Message) extends Message

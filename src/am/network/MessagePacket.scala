@@ -1,8 +1,8 @@
 package am.network
 
-class MessagePacket(
-  val from: ActorAddress,
-  val to: ActorAddress,
-  val contents: Object) {
+import am.ActorAddress
 
-}
+case class MessagePacket(
+  from: ActorAddress,
+  to: NetworkActorAddress,
+  contents: Object)

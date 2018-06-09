@@ -1,6 +1,6 @@
 package am.message
 
 /**
- * When an actor receives this message, it shuts down completely.
+ * When an actor receives this message, it shuts down.
  */
-case class KillMessage() extends Message
+final case class KillMessage() extends Message
