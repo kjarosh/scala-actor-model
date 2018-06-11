@@ -2,12 +2,17 @@ package am.util
 
 import am.message.{Message, TrackIdleMessage}
 import am.{AbstractActor, ActorRef}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
 private case class TargetFreeMessage(id: Int) extends Message
 
-class Dispatcher extends AbstractActor {
+case class DispatchMessage(msg: Message) extends Message
+
+class Dispatcher(private val owner: ActorRef) extends AbstractActor {
+  private val logger = Logger("Dispatcher")
+
   private var nextId = 1
   private val targetsFree = new mutable.HashMap[Int, Boolean]()
   private val targetsById = new mutable.HashMap[Int, ActorRef]()
@@ -47,7 +52,7 @@ class Dispatcher extends AbstractActor {
 
   private def handleEnqueued(): Unit = lock.synchronized {
     var id = firstFree()
-    while (id != 0) {
+    while (id != 0 && !toHandle.isEmpty) {
       val (sender, message) = toHandle.dequeue()
       handle(id, sender, message)
 
@@ -57,7 +62,7 @@ class Dispatcher extends AbstractActor {
 
   private def handle(id: Int, sender: ActorRef, message: Message): Unit = {
     val finalMessage = TrackIdleMessage(message, TargetFreeMessage(id))
-    targetsById(id).send(sender, finalMessage)
+    targetsById(id).send(finalMessage)
     targetsFree(id) = false
   }
 
@@ -68,7 +73,8 @@ class Dispatcher extends AbstractActor {
 
         handleEnqueued()
 
-      case _ =>
+      // request to dispatch
+      case DispatchMessage(message) =>
         val id = firstFree()
         if (id != 0) {
           handle(id, sender, message)
@@ -77,6 +83,10 @@ class Dispatcher extends AbstractActor {
 
         // no free actor
         toHandle.enqueue((sender, message))
+
+      // it's a response
+      case _ =>
+        owner.send(sender, message)
     }
   }
 }

@@ -1,7 +1,5 @@
 package am
 
-import java.util.concurrent.Semaphore
-
 import am.message._
 import com.typesafe.scalalogging.Logger
 
@@ -24,13 +22,25 @@ abstract class AbstractActor extends Actor {
   private def logger = AbstractActor.logger
 
   private val queue = new mutable.Queue[(ActorRef, Message)]()
-  private val ready = new Semaphore(0)
+  private val queueLock = new Object()
 
   private val thread = new Thread(() => run())
   thread.start()
 
-  private def defaultReference: ActorRef =
-    (sender, message) => this.dispatch(sender, message)
+  private var name = thread.getName
+
+  final def setName(name: String): Unit = {
+    this.name = name
+  }
+
+  final def getName: String = name
+
+  private def defaultReference: ActorRef = new ActorRef {
+    override def send(sender: ActorRef, message: Message): Unit =
+      dispatch(sender, message)
+
+    override def toString: String = "actor:" + name
+  }
 
   /**
    * This is the provider of the default message sender.
@@ -53,21 +63,21 @@ abstract class AbstractActor extends Actor {
 
   def receive(sender: ActorRef, message: Message)
 
-  final def dispatch(sender: ActorRef, message: Message): Unit = {
+  final def dispatch(sender: ActorRef, message: Message): Unit = queueLock.synchronized {
     queue.enqueue((sender, message))
 
     // notify this actor that a new message is in the queue
-    ready.release()
+    queueLock.notifyAll()
   }
 
   private def run(): Unit = {
     var idleHandler: () => Unit = null
 
-    while (!Thread.interrupted()) {
+    while (!Thread.interrupted()) queueLock.synchronized {
       // wait for a message
-      if (!ready.tryAcquire()) {
+      while (queue.isEmpty) {
         if (idleHandler != null) idleHandler()
-        ready.acquire()
+        queueLock.wait()
       }
 
       val (sender, message) = queue.dequeue()
@@ -92,7 +102,7 @@ abstract class AbstractActor extends Actor {
       val h = accept(sender, m)
 
       return () => {
-        h()
+        if (h != null) h()
 
         // send confirmation when idle
         sender :! c

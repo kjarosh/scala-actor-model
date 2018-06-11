@@ -15,4 +15,6 @@ trait PortableActorRef extends ActorRef {
 
   def address: ActorAddress
   def send(sender: PortableActorRef, message: Message): Unit
+
+  override def toString: String = s"address:$address"
 }
