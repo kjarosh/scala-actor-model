@@ -1,0 +1,30 @@
+plugins {
+    id 'idea'
+    id 'scala'
+    id 'application'
+}
+
+description = 'Actor based model library for Scala'
+version = '0.1'
+
+mainClassName = 'app.Main'
+
+jar {
+    baseName = 'scala-actor-model'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'com.typesafe.scala-logging:scala-logging_2.12:3.9.0'
+
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
