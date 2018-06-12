@@ -14,7 +14,7 @@ class WorkerActor extends AbstractActor {
 
   override def receive(sender: ActorRef, message: Message): Unit = message match {
     case CountWordsInLineMessage(line) =>
-      for (word <- line.split("[ ,!.]+")) {
+      for (word <- line.split("[ “”\",!.()/]+")) {
         val wordl = word.toLowerCase
         result(wordl) = result.getOrElse(wordl, 0) + 1
       }
