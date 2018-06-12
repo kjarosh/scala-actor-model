@@ -7,12 +7,8 @@ import com.typesafe.scalalogging.Logger
 
 import scala.annotation.tailrec
 
-/**
- * An implementation of the Reliable UDP communication,
- * i.e. such that no packet loss is guaranteed.
- */
-class RUDPServer extends AutoCloseable {
-  private def logger = RUDPServer.logger
+class UDPServer extends AutoCloseable {
+  private def logger = UDPServer.logger
 
   private val socket = new DatagramSocket()
 
@@ -37,14 +33,14 @@ class RUDPServer extends AutoCloseable {
 
     val buf = bos.toByteArray
 
-    if (buf.length > RUDPServer.MAX_PACKET_SIZE) {
+    if (buf.length > UDPServer.MAX_PACKET_SIZE) {
       throw MessageTooLongException(buf.length)
     }
 
     socket.send(new DatagramPacket(buf, buf.length, packet.to.address))
   }
 
-  private val buffer = new Array[Byte](RUDPServer.MAX_PACKET_SIZE)
+  private val buffer = new Array[Byte](UDPServer.MAX_PACKET_SIZE)
 
   @tailrec
   final def receive(): MessagePacket = {
@@ -70,7 +66,7 @@ class RUDPServer extends AutoCloseable {
   }
 }
 
-object RUDPServer {
+object UDPServer {
   private val logger = Logger("RUDPServer")
 
   // 16 KiB

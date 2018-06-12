@@ -14,6 +14,7 @@ class MasterActor() extends AbstractActor {
   private def logger = MasterActor.logger
 
   val dispatcher = new Dispatcher(reference)
+  addSibling(dispatcher)
   val dispatcherRef = dispatcher.reference
 
   val results = new mutable.HashMap[String, Int]()

@@ -10,7 +10,7 @@ import am.message.Message
 trait PortableActorRef extends ActorRef {
   def send(sender: ActorRef, message: Message): Unit = sender match {
     case portable: PortableActorRef => send(portable, message)
-    case _ => throw null
+    case _ => throw InvalidSenderException("sender is not portable")
   }
 
   def address: ActorAddress

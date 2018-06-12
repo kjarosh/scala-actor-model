@@ -4,7 +4,7 @@ import am.PortableActorRef
 import am.message.Message
 
 class NetworkActorRef(
-  private val server: RUDPServer,
+  private val server: UDPServer,
   private val addr: NetworkActorAddress) extends PortableActorRef {
 
   def address: NetworkActorAddress = addr

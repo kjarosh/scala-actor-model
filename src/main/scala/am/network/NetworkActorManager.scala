@@ -16,7 +16,7 @@ class NetworkActorManager extends ActorManager {
   /**
    * Used for sending and receiving messages.
    */
-  private val server = new RUDPServer()
+  private val server = new UDPServer()
   private val registered = new mutable.HashMap[Int, Actor]()
   private var nextId = 0
 
@@ -34,6 +34,8 @@ class NetworkActorManager extends ActorManager {
 
     registered.put(id, actor)
     actor.reference = referenceAddress(new NetworkActorAddress(server.socketAddress, id))
+
+    actor.registered(this)
   }
 
   private def handlePacket(): Unit = {

@@ -29,6 +29,16 @@ abstract class AbstractActor extends Actor {
 
   private var name = thread.getName
 
+  private val siblings = mutable.ArrayBuffer.empty[Actor]
+
+  protected final def addSibling(sibling: Actor): Unit = {
+    siblings += sibling
+  }
+
+  override def registered(manager: ActorManager): Unit = {
+    for (s <- siblings) manager.register(s)
+  }
+
   final def setName(name: String): Unit = {
     this.name = name
   }

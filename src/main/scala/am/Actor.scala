@@ -1,6 +1,7 @@
 package am
 
 import am.message.Message
+import am.network.NetworkActorManager
 
 trait Actor {
   /**
@@ -12,6 +13,8 @@ trait Actor {
   def reference: ActorRef
 
   def reference_=(ref: ActorRef)
+
+  def registered(manager: ActorManager): Unit
 }
 
 object Actor {
