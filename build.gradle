@@ -7,7 +7,7 @@ plugins {
 description = 'Actor based model library for Scala'
 version = '0.1'
 
-mainClassName = 'app.Main'
+mainClassName = 'app.WordCounter'
 
 jar {
     baseName = 'scala-actor-model'

@@ -67,7 +67,7 @@ class UDPServer extends AutoCloseable {
 }
 
 object UDPServer {
-  private val logger = Logger("RUDPServer")
+  private val logger = Logger("UDPServer")
 
   // 16 KiB
   private val MAX_PACKET_SIZE = 16 * 1024
