@@ -8,4 +8,6 @@ abstract class AbstractActorManager extends ActorManager {
       case _ => throw UnsupportedAddressExeption(address)
     }
   }
+
+  override def shutdown(): Unit = {}
 }

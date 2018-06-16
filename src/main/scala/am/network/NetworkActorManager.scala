@@ -13,13 +13,15 @@ import scala.collection.mutable
  *
  * The manager itself runs in its own thread.
  */
-class NetworkActorManager extends AbstractActorManager {
+class NetworkActorManager(
+  private val ip: String,
+  private val port: Int) extends AbstractActorManager {
   private def logger = NetworkActorManager.logger
 
   /**
    * Used for sending and receiving messages.
    */
-  private val server = new UDPServer()
+  private val server = new UDPServer(ip, port)
   private val registered = new mutable.HashMap[Int, Actor]()
   private var nextId = 0
 
@@ -27,11 +29,9 @@ class NetworkActorManager extends AbstractActorManager {
     () => while (!Thread.interrupted()) handlePacket())
   thread.start()
 
-  def this(ip: String, port: Int) = {
-    this()
+  def this(ip: String) = this(ip, 0)
 
-    server.bind(ip, port)
-  }
+  def this() = this("0.0.0.0", 0)
 
   /**
    * The given actor is registered in this manager and is given a unique

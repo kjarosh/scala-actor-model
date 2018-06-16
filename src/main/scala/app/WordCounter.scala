@@ -7,9 +7,9 @@ import am.network.NetworkActorManager
 object WordCounter {
   def main(args: Array[String]): Unit = {
     val enableNetworking = true
-    val masterManager = new NetworkActorManager()
-    val cluster1Manager = new NetworkActorManager()
-    val cluster2Manager = new NetworkActorManager()
+    val masterManager = new NetworkActorManager("127.0.0.1")
+    val cluster1Manager = new NetworkActorManager("127.0.0.1")
+    val cluster2Manager = new NetworkActorManager("127.0.0.1")
 
     val master = new MasterActor()
     master.setName("master")
