@@ -1,7 +1,7 @@
 package am.network
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.net.{DatagramPacket, DatagramSocket, SocketAddress}
+import java.net.{DatagramPacket, DatagramSocket, InetSocketAddress, SocketAddress}
 
 import com.typesafe.scalalogging.Logger
 
@@ -11,6 +11,8 @@ class UDPServer extends AutoCloseable {
   private def logger = UDPServer.logger
 
   private val socket = new DatagramSocket()
+
+  def bind(ip: String, port: Int) = socket.bind(new InetSocketAddress(ip, port))
 
   /**
    * Local port.

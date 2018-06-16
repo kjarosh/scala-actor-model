@@ -2,6 +2,7 @@ package am.network
 
 import am._
 import am.message.{KillMessage, Message}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
@@ -12,7 +13,9 @@ import scala.collection.mutable
  *
  * The manager itself runs in its own thread.
  */
-class NetworkActorManager extends ActorManager {
+class NetworkActorManager extends AbstractActorManager {
+  private def logger = NetworkActorManager.logger
+
   /**
    * Used for sending and receiving messages.
    */
@@ -23,6 +26,12 @@ class NetworkActorManager extends ActorManager {
   private val thread = new Thread(
     () => while (!Thread.interrupted()) handlePacket())
   thread.start()
+
+  def this(ip: String, port: Int) = {
+    this()
+
+    server.bind(ip, port)
+  }
 
   /**
    * The given actor is registered in this manager and is given a unique
@@ -43,7 +52,7 @@ class NetworkActorManager extends ActorManager {
 
     val receiver = registered.get(packet.to.id).orNull
     if (receiver == null) {
-      println("Invalid receiver")
+      logger.error("While handling a packet: invalid receiver")
       return
     }
 
@@ -51,17 +60,13 @@ class NetworkActorManager extends ActorManager {
 
     packet.contents match {
       case m: Message => receiver.dispatch(sender, m)
-      case _ => println("Invalid message")
+      case _ => logger.error("While handling a packet: invalid message")
     }
   }
 
-  override def referenceAddress(addr: ActorAddress): ActorRef = {
-    val noAddress = ActorAddress.noAddress
-    addr match {
-      case `noAddress` => Actor.ignore
-      case naddr: NetworkActorAddress => new NetworkActorRef(server, naddr)
-      case _ => throw UnsupportedAddressExeption(addr)
-    }
+  override def referenceAddress(address: ActorAddress): ActorRef = address match {
+    case address: NetworkActorAddress => new NetworkActorRef(server, address)
+    case _ => super.referenceAddress(address)
   }
 
   override def shutdown(): Unit = {
@@ -71,5 +76,11 @@ class NetworkActorManager extends ActorManager {
       case (_, actor) => actor.dispatch(Actor.ignore, KillMessage())
     })
     server.close()
+
+    super.shutdown()
   }
+}
+
+object NetworkActorManager {
+  private val logger = Logger("NetworkActorManager")
 }

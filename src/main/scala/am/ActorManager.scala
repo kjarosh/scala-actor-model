@@ -11,10 +11,10 @@ trait ActorManager {
   /**
    * This method is using for referencing addresses that are asociated with actors.
    *
-   * @param addr actor's address
+   * @param address actor's address
    * @return reference to an actor associated with the given address
    */
-  def referenceAddress(addr: ActorAddress): ActorRef
+  def referenceAddress(address: ActorAddress): ActorRef
 
   def shutdown()
 }
