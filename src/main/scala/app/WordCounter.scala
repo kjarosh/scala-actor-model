@@ -27,6 +27,6 @@ object WordCounter {
     master.addWorker(worker1.reference)
     master.addWorker(worker2.reference)
 
-    master.reference.send(Actor.ignore, CountWordsFromFile("test.txt"))
+    master.reference.send(Actor.ignore, CountWordsFromFileMessage("test.txt"))
   }
 }

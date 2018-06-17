@@ -24,14 +24,14 @@ class MasterActor() extends AbstractActor {
   }
 
   override def receive(sender: ActorRef, message: Message): Unit = message match {
-    case CountWordsFromFile(filename) =>
+    case CountWordsFromFileMessage(filename) =>
       logger.info(s"Received a request to count file: $filename")
       Files.lines(Paths.get(filename))
         .map[Message](CountWordsInLineMessage(_))
         .map[Message](DispatchMessage(_))
         .forEach(dispatcherRef.send(_))
 
-    case CountedWords(result) =>
+    case CountedWordsMessage(result) =>
       for ((key, value) <- result) {
         results.put(key, results.getOrElse(key, 0) + value)
       }
