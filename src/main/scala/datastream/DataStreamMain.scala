@@ -2,20 +2,20 @@ package datastream
 
 import am.Actor
 import am.network.NetworkActorManager
+import am.util.{Broadcaster, Dispatcher}
 import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 
+
 object DataStreamMain {
   private val logger = Logger("DataStreamMain")
 
+  private implicit val sender = Actor.ignore
+
   def main(args: Array[String]): Unit = {
-    val enableNetworking = true
-
-    val providersManager = new NetworkActorManager("127.0.0.1")
-    val realtimeManager = new NetworkActorManager("127.0.0.1")
-
-    val provider = new ProviderActor(Actor.ignore)
+    val wordStat = new WordStatisticsActor()
+    val provider = new ProviderActor(wordStat.reference)
 
     logger.info("Loading config")
     val conf = ConfigFactory.load()
@@ -30,6 +30,11 @@ object DataStreamMain {
       secret = conf.getString("access-secret")
     )
 
-    provider.reference.send(Actor.ignore, StartProvidingMessage(consumerToken, accessToken))
+    provider.reference :! StartProvidingMessage(consumerToken, accessToken)
+
+    while(!Thread.interrupted()){
+      wordStat.reference :! ShowResultsMessage()
+      Thread.sleep(1000)
+    }
   }
 }

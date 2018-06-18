@@ -11,6 +11,9 @@ case class StartProvidingMessage(
   consumerToken: ConsumerToken,
   accessToken: AccessToken) extends Message
 
+case class TweetMessage(
+  tweet: Tweet) extends Message
+
 class ProviderActor(private val target: ActorRef) extends AbstractActor {
   private def logger = ProviderActor.logger
 
@@ -22,7 +25,7 @@ class ProviderActor(private val target: ActorRef) extends AbstractActor {
       val streamingClient = TwitterStreamingClient(consumerToken, accessToken)
 
       def printTweetText: PartialFunction[StreamingMessage, Unit] = {
-        case tweet: Tweet => println(tweet.text)
+        case tweet: Tweet => target :! TweetMessage(tweet)
       }
 
       streamingClient.sampleStatuses(stall_warnings = true)(printTweetText)
