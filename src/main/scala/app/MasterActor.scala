@@ -15,7 +15,7 @@ class MasterActor() extends AbstractActor {
 
   val dispatcher = new Dispatcher(reference)
   addSibling(dispatcher)
-  val dispatcherRef = dispatcher.reference
+  val dispatcherRef: ActorRef = dispatcher.reference
 
   val results = new mutable.HashMap[String, Int]()
 
@@ -32,6 +32,7 @@ class MasterActor() extends AbstractActor {
         .forEach(dispatcherRef.send(_))
 
     case CountedWords(result) =>
+      logger.info(s"Received result from $sender : $result")
       for ((key, value) <- result) {
         results.put(key, results.getOrElse(key, 0) + value)
       }
