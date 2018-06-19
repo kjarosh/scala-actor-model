@@ -1,16 +1,21 @@
 package am.network
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.net.{DatagramPacket, DatagramSocket, SocketAddress}
+import java.net.{DatagramPacket, DatagramSocket, InetSocketAddress, SocketAddress}
 
 import com.typesafe.scalalogging.Logger
 
 import scala.annotation.tailrec
 
-class UDPServer extends AutoCloseable {
+class UDPServer(
+  private val ip: String,
+  private val portNumber: Int) extends AutoCloseable {
   private def logger = UDPServer.logger
 
-  private val socket = new DatagramSocket()
+  private val socket = new DatagramSocket(null)
+  socket.bind(new InetSocketAddress(ip, port))
+
+  def this() = this("0.0.0.0", 0)
 
   /**
    * Local port.

@@ -10,7 +10,7 @@ private case class TargetFreeMessage(id: Int) extends Message
 
 case class DispatchMessage(msg: Message) extends Message
 
-class Dispatcher(private val owner: ActorRef) extends AbstractActor {
+class Dispatcher(private val owner: ActorRef = null) extends AbstractActor {
   private val logger = Logger("Dispatcher")
 
   private var nextId = 1
@@ -86,7 +86,7 @@ class Dispatcher(private val owner: ActorRef) extends AbstractActor {
 
       // it's a response
       case _ =>
-        owner.send(sender, message)
+        if(owner != null) owner.send(sender, message)
     }
   }
 }
