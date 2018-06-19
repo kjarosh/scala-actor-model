@@ -33,12 +33,12 @@ class WordStatisticsActor extends AbstractActor {
       System.out.synchronized {
         println("\n\n")
 
-        for (i <- 10 to 0 by -1) {
+        for (i <- 20 to 0 by -1) {
           if (i < sorted.size)
             println(s"${sorted(i)._2} | ${sorted(i)._1}")
         }
 
-        println(s"Those were 10 most popular words")
+        println(s"Those were 20 most popular words")
         println(s"Total tweets: ${tweets.size}")
       }
 

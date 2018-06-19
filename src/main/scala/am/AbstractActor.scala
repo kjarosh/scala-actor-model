@@ -104,7 +104,7 @@ abstract class AbstractActor extends Actor {
       val h = accept(sender, m)
 
       // send confirmation
-      sender :! c
+      sender ! c
 
       return h
 
@@ -115,7 +115,7 @@ abstract class AbstractActor extends Actor {
         if (h != null) h()
 
         // send confirmation when idle
-        sender :! c
+        sender ! c
       }
 
     case m: Message =>
