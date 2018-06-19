@@ -36,14 +36,14 @@ object DataStreamMain {
       secret = conf.getString("access-secret")
     )
 
-    provider.reference :! StartProvidingMessage(consumerToken, accessToken)
+    provider.reference ! StartProvidingMessage(consumerToken, accessToken)
 
     while (!Thread.interrupted()) {
-      wordStat.reference :! ShowResultsMessage()
+      wordStat.reference ! ShowResultsMessage()
       Thread.sleep(2000)
       //bestTweets.reference :! ShowResultsMessage()
       //Thread.sleep(2000)
-      countryStat.reference :! ShowResultsMessage()
+      countryStat.reference ! ShowResultsMessage()
       Thread.sleep(2000)
     }
   }

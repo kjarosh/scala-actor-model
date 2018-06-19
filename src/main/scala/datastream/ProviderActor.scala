@@ -18,7 +18,7 @@ class ProviderActor(private val target: ActorRef) extends AbstractActor {
       val streamingClient = TwitterStreamingClient(consumerToken, accessToken)
 
       def printTweetText: PartialFunction[StreamingMessage, Unit] = {
-        case tweet: Tweet => target :! TweetMessage(tweet)
+        case tweet: Tweet => target ! TweetMessage(tweet)
       }
 
       streamingClient.sampleStatuses(stall_warnings = true)(printTweetText)

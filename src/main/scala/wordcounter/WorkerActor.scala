@@ -21,7 +21,7 @@ class WorkerActor extends AbstractActor {
       }
 
       logger.info("Counted '" + line + "' to " + result.toMap)
-      sender :! CountedWordsMessage(result.toMap)
+      sender ! CountedWordsMessage(result.toMap)
 
     case _ =>
       logger.error(s"Unrecognized message: $message from $sender")

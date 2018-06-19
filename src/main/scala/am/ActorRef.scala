@@ -29,10 +29,10 @@ trait ActorRef {
    *
    * @param message the message to send
    * @param sender  the sender of the message
-   * @return sent message
+   * @return this
    */
-  def :!(message: Message)(implicit sender: ActorRef): Message = {
+  def !(message: Message)(implicit sender: ActorRef): ActorRef = {
     send(sender, message)
-    message
+    this
   }
 }
