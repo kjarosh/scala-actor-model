@@ -7,15 +7,8 @@ import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken, Tweet
 import com.danielasfregola.twitter4s.{TwitterRestClient, TwitterStreamingClient}
 import com.typesafe.scalalogging.Logger
 
-case class StartProvidingMessage(
-  consumerToken: ConsumerToken,
-  accessToken: AccessToken) extends Message
-
-case class TweetMessage(
-  tweet: Tweet) extends Message
-
 class ProviderActor(private val target: ActorRef) extends AbstractActor {
-  private def logger = ProviderActor.logger
+  private def logger = Logger("ProviderActor")
 
   override def receive(sender: ActorRef, message: Message): Unit = message match {
     case StartProvidingMessage(consumerToken, accessToken) =>
@@ -33,8 +26,4 @@ class ProviderActor(private val target: ActorRef) extends AbstractActor {
     case _ =>
       logger.error(s"Unrecognized message: $message from $sender")
   }
-}
-
-object ProviderActor {
-  private val logger = Logger("Provider")
 }

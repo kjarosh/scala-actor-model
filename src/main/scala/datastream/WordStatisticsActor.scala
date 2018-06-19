@@ -6,10 +6,8 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 
-case class ShowResultsMessage() extends Message
-
 class WordStatisticsActor extends AbstractActor {
-  private def logger = WordStatisticsActor.logger
+  private def logger = Logger("WordStatisticsActor")
 
   private val tweets = mutable.Queue[Array[String]]()
 
@@ -32,12 +30,17 @@ class WordStatisticsActor extends AbstractActor {
         .toSeq
         .sortWith((a, b) => a._2 > b._2)
 
-      for(i <- 30 to 0 by -1){
-        if(i < sorted.size)
-          println(s"${sorted(i)._2} | ${sorted(i)._1}")
-      }
+      System.out.synchronized {
+        println("\n\n")
 
-      println(s"Total tweets: ${tweets.size}")
+        for (i <- 10 to 0 by -1) {
+          if (i < sorted.size)
+            println(s"${sorted(i)._2} | ${sorted(i)._1}")
+        }
+
+        println(s"Those were 10 most popular words")
+        println(s"Total tweets: ${tweets.size}")
+      }
 
     case _ =>
       logger.error(s"Unrecognized message: $message from $sender")
@@ -45,8 +48,6 @@ class WordStatisticsActor extends AbstractActor {
 }
 
 object WordStatisticsActor {
-  private val logger = Logger("Provider")
-
   private def toAlnum(s: String): String = {
     new String(s.toCharArray().filter(s => Character.isLetterOrDigit(s)))
   }

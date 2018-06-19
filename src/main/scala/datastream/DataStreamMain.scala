@@ -1,8 +1,7 @@
 package datastream
 
 import am.Actor
-import am.network.NetworkActorManager
-import am.util.{Broadcaster, Dispatcher}
+import am.util.Broadcaster
 import com.danielasfregola.twitter4s.entities.{AccessToken, ConsumerToken}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
@@ -15,7 +14,14 @@ object DataStreamMain {
 
   def main(args: Array[String]): Unit = {
     val wordStat = new WordStatisticsActor()
-    val provider = new ProviderActor(wordStat.reference)
+    val countryStat = new CountryStatisticsActor()
+    val bestTweets = new BestTweetsActor()
+    val receiver = new Broadcaster()
+    receiver.add(wordStat.reference)
+    receiver.add(bestTweets.reference)
+    receiver.add(countryStat.reference)
+
+    val provider = new ProviderActor(receiver.reference)
 
     logger.info("Loading config")
     val conf = ConfigFactory.load()
@@ -32,9 +38,13 @@ object DataStreamMain {
 
     provider.reference :! StartProvidingMessage(consumerToken, accessToken)
 
-    while(!Thread.interrupted()){
+    while (!Thread.interrupted()) {
       wordStat.reference :! ShowResultsMessage()
-      Thread.sleep(1000)
+      Thread.sleep(2000)
+      //bestTweets.reference :! ShowResultsMessage()
+      //Thread.sleep(2000)
+      countryStat.reference :! ShowResultsMessage()
+      Thread.sleep(2000)
     }
   }
 }
