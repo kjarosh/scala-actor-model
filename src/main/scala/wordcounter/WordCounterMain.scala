@@ -10,6 +10,7 @@ object WordCounterMain {
     val masterManager = new NetworkActorManager("127.0.0.1")
     val cluster1Manager = new NetworkActorManager("127.0.0.1")
     val cluster2Manager = new NetworkActorManager("127.0.0.1")
+    val cluster3Manager = new NetworkActorManager("127.0.0.1")
 
     val master = new MasterActor()
     master.setName("master")
@@ -24,7 +25,7 @@ object WordCounterMain {
     if (enableNetworking) cluster2Manager.register(worker2)
 
     val worker3 = new WorkerActor()
-    worker3.setName("worker2")
+    worker3.setName("worker3")
     cluster3Manager.register(worker3)
 
 
