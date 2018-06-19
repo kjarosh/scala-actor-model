@@ -1,4 +1,4 @@
-package app
+package wordcounter
 
 import am.message.Message
 import am.{AbstractActor, ActorRef}

@@ -1,4 +1,4 @@
-package app
+package wordcounter
 
 import java.nio.file.{Files, Paths}
 

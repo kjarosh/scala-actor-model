@@ -1,10 +1,10 @@
-package app
+package wordcounter
 
 import am.Actor
 import am.network.NetworkActorManager
 
 
-object WordCounter {
+object WordCounterMain {
   def main(args: Array[String]): Unit = {
     val enableNetworking = true
     val masterManager = new NetworkActorManager("127.0.0.1")
