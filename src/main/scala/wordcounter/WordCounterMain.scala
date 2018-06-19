@@ -23,9 +23,14 @@ object WordCounterMain {
     worker2.setName("worker2")
     if (enableNetworking) cluster2Manager.register(worker2)
 
+    val worker3 = new WorkerActor()
+    worker3.setName("worker2")
+    cluster3Manager.register(worker3)
+
 
     master.addWorker(worker1.reference)
     master.addWorker(worker2.reference)
+    master.addWorker(worker3.reference)
 
     master.reference.send(Actor.ignore, CountWordsFromFileMessage("test.txt"))
   }
